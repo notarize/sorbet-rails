@@ -575,29 +575,6 @@ You can also configure the core model plugins if needed. The default plugins are
 [AASM]: https://github.com/aasm/aasm
 [Money-Rails]: https://github.com/RubyMoney/money-rails
 
-### Customize Generation Class
-
-For mailer and job rbi generation, you can customize the logic by
-setting the generation class in the config:
-
-```ruby
-SorbetRails.configure do |config|
-  config.job_generator_class = CustomJobRbiGenerator
-  config.mailer_generator_class = CustomMailerRbiGenerator
-end
-```
-
-The custom generator can subclass the [provided generators](lib/bundled_rbi/customizabel_rbi_formatter.rbi) and override the populate_rbi method. For example:
-
-```ruby
-class CustomJobRbiGenerator < SorbetRails::JobRbiFormatter
-  def populate_rbi
-    rbi_generator.root.add_comment("== Custom Generator ==")
-    super
-  end
-end
-```
-
 ## Contributing
 
 Contributions and ideas are welcome! Please see [our contributing guide](CONTRIBUTING.md) and don't hesitate to open an issue or send a pull request to improve the functionality of this gem.
