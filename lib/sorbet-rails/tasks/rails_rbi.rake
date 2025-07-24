@@ -2,8 +2,6 @@ require("sorbet-rails/active_record_rbi_formatter")
 require("sorbet-rails/model_rbi_formatter")
 require("sorbet-rails/routes_rbi_formatter")
 require("sorbet-rails/helper_rbi_formatter")
-require("sorbet-rails/mailer_rbi_formatter")
-require("sorbet-rails/job_rbi_formatter")
 require("sorbet-rails/utils")
 
 RAILS_RBI_RAKE_DIR  = File.dirname(__FILE__)
@@ -19,8 +17,6 @@ namespace :rails_rbi do
     Rake::Task[rails_rbi_task_name(t, 'routes')].invoke
     Rake::Task[rails_rbi_task_name(t, 'models')].invoke
     Rake::Task[rails_rbi_task_name(t, 'helpers')].invoke
-    Rake::Task[rails_rbi_task_name(t, 'mailers')].invoke
-    Rake::Task[rails_rbi_task_name(t, 'jobs')].invoke
     Rake::Task[rails_rbi_task_name(t, 'custom')].invoke
   end
 
@@ -122,48 +118,6 @@ namespace :rails_rbi do
     else
       formatter = SorbetRails::HelperRbiFormatter.new(helpers)
       file_path = Rails.root.join("sorbet", "rails-rbi", "helpers.rbi")
-      FileUtils.mkdir_p(File.dirname(file_path))
-      File.write(file_path, formatter.generate_rbi)
-    end
-  end
-
-  desc "Generate rbis for rails mailers"
-  task :mailers, [:root_dir] => :environment do |t, args|
-    # Skip ActiveRecord if not included
-    next unless defined?(ActionMailer)
-
-    SorbetRails::Utils.rails_eager_load_all!
-    all_mailers = ActionMailer::Base.descendants
-
-    all_mailers.each do |mailer_class|
-      file_path = Rails.root.join(
-        "sorbet",
-        "rails-rbi",
-        "mailers",
-        "#{mailer_class.name.underscore}.rbi",
-      )
-      formatter = ::SorbetRails.config.mailer_generator_class.new(mailer_class)
-      FileUtils.mkdir_p(File.dirname(file_path))
-      File.write(file_path, formatter.generate_rbi)
-    end
-  end
-
-  desc "Generate rbis for rails mailers"
-  task :jobs, [:root_dir] => :environment do |t, args|
-    # Skip ActiveJob if not included
-    next unless defined?(ActiveJob)
-
-    SorbetRails::Utils.rails_eager_load_all!
-    all_jobs = ActiveJob::Base.descendants
-
-    all_jobs.each do |job_class|
-      file_path = Rails.root.join(
-        "sorbet",
-        "rails-rbi",
-        "jobs",
-        "#{job_class.name.underscore}.rbi",
-      )
-      formatter = ::SorbetRails.config.job_generator_class.new(job_class)
       FileUtils.mkdir_p(File.dirname(file_path))
       File.write(file_path, formatter.generate_rbi)
     end
