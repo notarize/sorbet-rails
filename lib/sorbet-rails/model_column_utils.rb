@@ -29,9 +29,16 @@ module SorbetRails::ModelColumnUtils
 
   sig { params(column_def: T.untyped).returns(ColumnType) }
   def type_for_column_def(column_def)
-    cast_type = ActiveRecord::Base.connection.respond_to?(:lookup_cast_type_from_column) ?
-      ActiveRecord::Base.connection.lookup_cast_type_from_column(column_def) :
-      column_def.cast_type
+    connection = ActiveRecord::Base.connection
+    cast_type =
+      if connection.respond_to?(:lookup_cast_type_from_column)
+        connection.lookup_cast_type_from_column(column_def)
+      else
+        # Rails 8.1 removed `lookup_cast_type_from_column` and made
+        # `Column#cast_type` protected. `lookup_cast_type(sql_type)` is the
+        # public equivalent (it's what the removed method called internally).
+        connection.lookup_cast_type(column_def.sql_type)
+      end
 
     array_type = false
     if column_def.try(:array?)
